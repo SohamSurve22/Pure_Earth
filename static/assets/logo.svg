@@ -1,0 +1,27 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Circle background -->
+  <circle cx="60" cy="60" r="55" fill="#ffffff"/>
+  
+  <!-- Earth representation -->
+  <circle cx="60" cy="60" r="40" fill="#1976D2"/>
+  
+  <!-- Continents -->
+  <path d="M70 40 Q80 50 75 70 Q70 80 60 85 Q45 90 40 75 Q35 65 40 50 Q45 40 60 35 Q65 35 70 40Z" fill="#4CAF50"/>
+  <path d="M85 55 Q80 65 85 75 Q90 80 95 75 Q100 65 95 55 Q90 50 85 55Z" fill="#4CAF50"/>
+  
+  <!-- Leaf overlay -->
+  <path d="M45 30 Q55 25 65 30 Q75 35 80 45 Q85 55 80 65 Q75 75 65 80 Q55 85 45 80 Q35 75 30 65 Q25 55 30 45 Q35 35 45 30Z" fill="#4CAF50" fill-opacity="0.6"/>
+  
+  <!-- Leaf stem -->
+  <path d="M60 30 Q58 40 60 50 Q62 60 60 70" stroke="#2E7D32" stroke-width="2" fill="none"/>
+  
+  <!-- Leaf veins -->
+  <path d="M60 40 Q50 45 40 43" stroke="#2E7D32" stroke-width="1.5" fill="none"/>
+  <path d="M60 40 Q70 45 80 43" stroke="#2E7D32" stroke-width="1.5" fill="none"/>
+  <path d="M60 50 Q50 55 40 53" stroke="#2E7D32" stroke-width="1.5" fill="none"/>
+  <path d="M60 50 Q70 55 80 53" stroke="#2E7D32" stroke-width="1.5" fill="none"/>
+  <path d="M60 60 Q50 65 40 63" stroke="#2E7D32" stroke-width="1.5" fill="none"/>
+  <path d="M60 60 Q70 65 80 63" stroke="#2E7D32" stroke-width="1.5" fill="none"/>
+  
+  <!-- Text "pureEarth" (hidden from SVG, will be added in HTML) -->
+</svg>

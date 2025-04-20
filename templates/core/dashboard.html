@@ -1,0 +1,512 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Dashboard | PureEarth{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-4 text-primary"><i class="fas fa-chart-line"></i> Sustainability Dashboard</h1>
+            <p class="lead">Real-time overview of sustainability metrics and performance indicators</p>
+        </div>
+    </div>
+
+    <!-- Overview Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title">Companies</h5>
+                            <h3 class="card-text">{{ company_count }}</h3>
+                        </div>
+                        <i class="fas fa-building fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="{% url 'leaderboard' %}">View Leaderboard</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title">Green Calculations</h5>
+                            <h3 class="card-text">{{ green_calculations_count }}</h3>
+                        </div>
+                        <i class="fas fa-leaf fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="{% url 'green_calculator' %}">Calculate Score</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title">AQI Submissions</h5>
+                            <h3 class="card-text">{{ aqi_submissions_count }}</h3>
+                        </div>
+                        <i class="fas fa-smog fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-dark stretched-link" href="{% url 'aqi_calculator' %}">Calculate AQI</a>
+                    <div class="small text-dark"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title">Thermal Images</h5>
+                            <h3 class="card-text">{{ thermal_analyses_count }}</h3>
+                        </div>
+                        <i class="fas fa-temperature-high fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="{% url 'image_analyzer' %}">Analyze Image</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Green Score Section -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-leaf"></i> Green Score Analysis</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-4 text-center">
+                            <div class="card border-0">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Average Green Score</h6>
+                                    <h2 class="display-4 fw-bold text-success">{{ avg_green_score|floatformat:1 }}</h2>
+                                    <div class="progress" style="height: 10px;">
+                                        <div class="progress-bar 
+                                            {% if avg_green_score >= 80 %}bg-success
+                                            {% elif avg_green_score >= 60 %}bg-warning
+                                            {% elif avg_green_score >= 40 %}bg-danger
+                                            {% else %}bg-dark{% endif %}"
+                                            role="progressbar" 
+                                            style="width: {{ avg_green_score }}%;" 
+                                            aria-valuenow="{{ avg_green_score }}" 
+                                            aria-valuemin="0" 
+                                            aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="chart-container" style="position: relative; height:200px;">
+                                <canvas id="greenStatusChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Metric Performance -->
+                    <h5 class="card-title mb-3">Average Metric Performance</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-0"><i class="fas fa-cloud"></i> Carbon</h6>
+                                            <small>{{ avg_carbon_score|floatformat:1 }}/100</small>
+                                        </div>
+                                        <div class="progress flex-grow-1 mx-3" style="height: 8px;">
+                                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ avg_carbon_score }}%" aria-valuenow="{{ avg_carbon_score }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-0"><i class="fas fa-bolt"></i> Energy</h6>
+                                            <small>{{ avg_energy_score|floatformat:1 }}/100</small>
+                                        </div>
+                                        <div class="progress flex-grow-1 mx-3" style="height: 8px;">
+                                            <div class="progress-bar bg-warning" role="progressbar" style="width: {{ avg_energy_score }}%" aria-valuenow="{{ avg_energy_score }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-0"><i class="fas fa-tint"></i> Water</h6>
+                                            <small>{{ avg_water_score|floatformat:1 }}/100</small>
+                                        </div>
+                                        <div class="progress flex-grow-1 mx-3" style="height: 8px;">
+                                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ avg_water_score }}%" aria-valuenow="{{ avg_water_score }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-0"><i class="fas fa-trash"></i> Waste</h6>
+                                            <small>{{ avg_waste_score|floatformat:1 }}/100</small>
+                                        </div>
+                                        <div class="progress flex-grow-1 mx-3" style="height: 8px;">
+                                            <div class="progress-bar bg-secondary" role="progressbar" style="width: {{ avg_waste_score }}%" aria-valuenow="{{ avg_waste_score }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-0"><i class="fas fa-wind"></i> AQI</h6>
+                                            <small>{{ avg_aqi_score|floatformat:1 }}/100</small>
+                                        </div>
+                                        <div class="progress flex-grow-1 mx-3" style="height: 8px;">
+                                            <div class="progress-bar bg-danger" role="progressbar" style="width: {{ avg_aqi_score }}%" aria-valuenow="{{ avg_aqi_score }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-0"><i class="fas fa-recycle"></i> Recycling</h6>
+                                            <small>{{ avg_recycling_score|floatformat:1 }}/100</small>
+                                        </div>
+                                        <div class="progress flex-grow-1 mx-3" style="height: 8px;">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ avg_recycling_score }}%" aria-valuenow="{{ avg_recycling_score }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Green Calculations -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-history"></i> Recent Green Calculations</h4>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for calc in recent_green_calculations %}
+                        <a href="{% url 'green_result' calc.id %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ calc.company.name }}</h6>
+                                <small class="text-muted">{{ calc.submitted_at|date:"M d, Y" }}</small>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <p class="mb-0 small">
+                                    <span class="badge 
+                                        {% if calc.green_score >= 80 %}bg-success
+                                        {% elif calc.green_score >= 60 %}bg-warning text-dark
+                                        {% elif calc.green_score >= 40 %}bg-danger
+                                        {% else %}bg-dark{% endif %}">
+                                        {{ calc.green_score|floatformat:1 }}
+                                    </span>
+                                    {{ calc.status }}
+                                </p>
+                                <i class="fas fa-angle-right"></i>
+                            </div>
+                        </a>
+                        {% empty %}
+                        <div class="list-group-item text-center py-4">
+                            <p class="mb-0 text-muted">No green calculations yet.</p>
+                            <a href="{% url 'green_calculator' %}" class="btn btn-sm btn-outline-success mt-2">
+                                <i class="fas fa-calculator"></i> Calculate Score
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thermal Analysis Section -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-temperature-high"></i> Thermal Analysis</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-body text-center">
+                                    <h6 class="text-muted">Average Heat Sources</h6>
+                                    <h2 class="display-4 fw-bold text-info">{{ avg_heat_sources|floatformat:1 }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-body text-center">
+                                    <h6 class="text-muted">Large Heat Sources</h6>
+                                    <h2 class="display-4 fw-bold text-warning">{{ avg_large_heat_sources|floatformat:1 }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-body text-center">
+                                    <h6 class="text-muted">Total Detected</h6>
+                                    <h2 class="display-4 fw-bold text-danger">{{ total_heat_sources }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-5">
+                            <h5 class="card-title mb-3">Pollution Status Distribution</h5>
+                            <div class="chart-container" style="position: relative; height:200px;">
+                                <canvas id="pollutionStatusChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <h5 class="card-title mb-3">Recent Thermal Analyses</h5>
+                            <div class="row">
+                                {% for analysis in recent_thermal_analyses %}
+                                <div class="col-md-4">
+                                    <div class="card mb-3">
+                                        <a href="{% url 'thermal_result' analysis.id %}">
+                                            <img src="data:image/jpeg;base64,{{ analysis.visualization_base64 }}" class="card-img-top" alt="Thermal analysis visualization">
+                                        </a>
+                                        <div class="card-body p-2 text-center">
+                                            <small class="mb-0">{{ analysis.company.name }}</small>
+                                            <span class="badge 
+                                                {% if analysis.thermal_category == 'Green' %}bg-success
+                                                {% elif analysis.thermal_category == 'Good' %}bg-info
+                                                {% elif analysis.thermal_category == 'Average' %}bg-warning text-dark
+                                                {% else %}bg-danger{% endif %} d-block mt-1">
+                                                {{ analysis.thermal_category }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="col-12">
+                                    <div class="card mb-3">
+                                        <div class="card-body text-center py-4">
+                                            <p class="mb-0 text-muted">No thermal analyses yet.</p>
+                                            <a href="{% url 'image_analyzer' %}" class="btn btn-sm btn-outline-info mt-2">
+                                                <i class="fas fa-temperature-high"></i> Analyze Image
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Legacy AQI Section -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0"><i class="fas fa-smog"></i> AQI Metrics </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6 text-center">
+                            <div class="card border-0">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Average AQI</h6>
+                                    <h2 class="display-4 fw-bold text-warning">{{ avg_legacy_aqi|floatformat:1 }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <div class="card border-0">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Average Points</h6>
+                                    <h2 class="display-4 fw-bold text-warning">{{ avg_aqi_points|floatformat:1 }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h5 class="card-title mb-3">AQI Category Distribution</h5>
+                    <div class="chart-container" style="position: relative; height:200px;">
+                        <canvas id="aqiCategoryChart"></canvas>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Green Status Chart
+    const greenStatusCtx = document.getElementById('greenStatusChart').getContext('2d');
+    const greenStatusData = {
+        labels: [
+            {% for item in green_status_data %}
+                '{{ item.status }}',
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'Companies',
+            data: [
+                {% for item in green_status_data %}
+                    {{ item.count }},
+                {% endfor %}
+            ],
+            backgroundColor: [
+                '#198754', // Green Certified (success)
+                '#ffc107', // On Track (warning)
+                '#dc3545', // Needs Improvement (danger)
+                '#212529'  // Not Green (dark)
+            ]
+        }]
+    };
+    
+    new Chart(greenStatusCtx, {
+        type: 'doughnut',
+        data: greenStatusData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        boxWidth: 15,
+                        padding: 15
+                    }
+                }
+            }
+        }
+    });
+
+    // Pollution Status Chart
+    const pollutionStatusCtx = document.getElementById('pollutionStatusChart').getContext('2d');
+    const pollutionStatusData = {
+        labels: [
+            {% for item in pollution_status_data %}
+                '{{ item.pollution_status }}',
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'Images',
+            data: [
+                {% for item in pollution_status_data %}
+                    {{ item.count }},
+                {% endfor %}
+            ],
+            backgroundColor: [
+                '#198754', // Non-Polluted (success)
+                '#ffc107', // Moderately Polluted (warning)
+                '#dc3545'  // Highly Polluted (danger)
+            ]
+        }]
+    };
+    
+    new Chart(pollutionStatusCtx, {
+        type: 'pie',
+        data: pollutionStatusData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 15,
+                        padding: 10
+                    }
+                }
+            }
+        }
+    });
+
+    // AQI Category Chart
+    const aqiCategoryCtx = document.getElementById('aqiCategoryChart').getContext('2d');
+    const aqiCategoryData = {
+        labels: [
+            {% for item in aqi_categories %}
+                '{{ item.aqi_category }}',
+            {% endfor %}
+        ],
+        datasets: [{
+            data: [
+                {% for item in aqi_categories %}
+                    {{ item.count }},
+                {% endfor %}
+            ],
+            backgroundColor: [
+                '#198754', // Green (success)
+                '#0dcaf0', // Good (info)
+                '#ffc107', // Average (warning)
+                '#dc3545'  // Poor (danger)
+            ]
+        }]
+    };
+    
+    new Chart(aqiCategoryCtx, {
+        type: 'doughnut',
+        data: aqiCategoryData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 15,
+                        padding: 10
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

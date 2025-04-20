@@ -1,0 +1,313 @@
+{% extends 'core/base.html' %}
+
+{% block title %}PureEarth - Environmental Monitoring Platform{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="py-5 bg-gradient-animated text-white position-relative">
+    <div id="particles-bg" class="particles-js"></div>
+    <div class="container py-4">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="fade-in">
+                    <h1 class="display-4 fw-bold mb-3">Monitor and Improve Your Environmental Impact</h1>
+                    <p class="lead mb-4">Track your company's environmental metrics, analyze thermal imaging, and compare sustainability performance with our comprehensive platform.</p>
+                    <div class="d-grid gap-2 d-md-flex mt-4">
+                        <a href="{% url 'dashboard' %}" class="btn btn-light btn-lg px-4 glow-effect">
+                            <i class="fas fa-chart-line me-2"></i> View Dashboard
+                        </a>
+                        <a href="{% url 'green_calculator' %}" class="btn btn-success btn-lg px-4 pulse">
+                            <i class="fas fa-leaf me-2"></i> Green Calculator
+                        </a>
+                        <a href="{% url 'aqi_calculator' %}" class="btn btn-outline-light btn-lg px-4">
+                            <i class="fas fa-calculator me-2"></i> Calculate AQI
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="text-center fade-in floating" style="animation-delay: 0.2s;">
+                    <img src="https://icons.iconarchive.com/icons/microsoft/fluentui-emoji-3d/128/Globe-Showing-Americas-3d-icon.png" alt="Earth illustration" class="img-fluid earth-rotate" style="max-height: 350px;">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Overview -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-4">
+            <h2 class="mb-3">Platform Overview</h2>
+            <p class="text-muted">Join the global community working to reduce environmental impact.</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="stat-card primary fade-in">
+                    <i class="fas fa-building"></i>
+                    <div class="stat-value">{{ company_count }}</div>
+                    <div class="stat-label">Companies</div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="stat-card secondary fade-in" style="animation-delay: 0.1s;">
+                    <i class="fas fa-leaf"></i>
+                    <div class="stat-value">{{ green_calculations_count }}</div>
+                    <div class="stat-label">Green Calculations</div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="stat-card secondary fade-in" style="animation-delay: 0.2s;">
+                    <i class="fas fa-calculator"></i>
+                    <div class="stat-value">{{ aqi_submissions_count }}</div>
+                    <div class="stat-label">AQI Submissions</div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="stat-card primary fade-in" style="animation-delay: 0.3s;">
+                    <i class="fas fa-camera"></i>
+                    <div class="stat-value">{{ thermal_analyses_count }}</div>
+                    <div class="stat-label">Thermal Analyses</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="mb-3">Key Features</h2>
+            <p class="text-muted">Comprehensive tools to monitor and improve environmental sustainability.</p>
+        </div>
+        
+        <div class="row g-4">
+            <!-- Green Calculator -->
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100 border-0 shadow hover-card fade-in">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center mx-auto mb-4 floating" style="width: 70px; height: 70px;">
+                            <i class="fas fa-leaf fa-2x"></i>
+                        </div>
+                        <h4>Green Calculator</h4>
+                        <p class="text-muted mb-3">Calculate your company's comprehensive sustainability score using multiple environmental metrics including carbon, energy, water, waste, air quality, and recycling.</p>
+                        <a href="{% url 'green_calculator' %}" class="btn btn-outline-success">
+                            <i class="fas fa-leaf me-1"></i> Calculate Green Score
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- AQI Calculator -->
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100 border-0 shadow hover-card fade-in" style="animation-delay: 0.1s;">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center mx-auto mb-4 floating" style="width: 70px; height: 70px; animation-delay: 0.2s;">
+                            <i class="fas fa-calculator fa-2x"></i>
+                        </div>
+                        <h4>AQI Calculator</h4>
+                        <p class="text-muted mb-3">Calculate your company's Air Quality Index using our advanced formula that considers energy usage, emissions, and environmental factors.</p>
+                        <a href="{% url 'aqi_calculator' %}" class="btn btn-outline-info">
+                            <i class="fas fa-calculator me-1"></i> Calculate AQI
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Thermal Analyzer -->
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100 border-0 shadow hover-card fade-in" style="animation-delay: 0.2s;">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center mx-auto mb-4 floating" style="width: 70px; height: 70px; animation-delay: 0.4s;">
+                            <i class="fas fa-camera fa-2x"></i>
+                        </div>
+                        <h4>Thermal Analyzer</h4>
+                        <p class="text-muted mb-3">Upload thermal images of your facilities to detect heat sources and analyze potential areas of energy waste and pollution.</p>
+                        <a href="{% url 'image_analyzer' %}" class="btn btn-outline-danger">
+                            <i class="fas fa-camera me-1"></i> Analyze Images
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <!-- Sustainability Leaderboard -->
+            <div class="col-lg-12 mb-4">
+                <div class="card h-100 border-0 shadow hover-card fade-in" style="animation-delay: 0.3s;">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center mx-auto mb-4 floating" style="width: 70px; height: 70px;">
+                            <i class="fas fa-trophy fa-2x"></i>
+                        </div>
+                        <h4>Sustainability Leaderboard</h4>
+                        <p class="text-muted mb-3">Compare your company's environmental performance with others and track your progress on our sustainability leaderboard. Rankings are based on a weighted score: 60% Green Calculator, 15% AQI, and 25% Thermal Analysis.</p>
+                        <a href="{% url 'leaderboard' %}" class="btn btn-outline-warning">
+                            <i class="fas fa-trophy me-1"></i> View Rankings
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Activity -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="mb-3">Recent Activity</h2>
+            <p class="text-muted">The latest environmental assessments from our user community.</p>
+        </div>
+        
+        <div class="row">
+            <!-- Recent Green Calculator Submissions -->
+            <div class="col-lg-4 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-leaf text-primary me-2"></i> Green Calculator Results
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_green %}
+                            <div class="list-group list-group-flush">
+                                {% for submission in recent_green %}
+                                    <div class="list-group-item px-0">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">{{ submission.company.name }}</h6>
+                                                <p class="text-muted small mb-0">
+                                                    <i class="fas fa-industry me-1"></i> {{ submission.company.industry|default:"Not specified" }} |
+                                                    <i class="fas fa-calendar me-1"></i> {{ submission.submitted_at|date:"M d, Y" }}
+                                                </p>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge {% if 'Green Certified' in submission.status %}aqi-green{% elif 'On Track' in submission.status %}aqi-good{% elif 'Needs Improvement' in submission.status %}aqi-average{% else %}aqi-poor{% endif %} p-2">{{ submission.status }}</span>
+                                                <div class="text-muted small mt-1">{{ submission.green_score|floatformat:1 }} / 100</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-leaf fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No Green Calculator submissions yet.</p>
+                                <a href="{% url 'green_calculator' %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-plus me-1"></i> Add First Submission
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent AQI Submissions -->
+            <div class="col-lg-4 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-calculator text-success me-2"></i> Recent AQI Submissions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_aqi %}
+                            <div class="list-group list-group-flush">
+                                {% for submission in recent_aqi %}
+                                    <div class="list-group-item px-0">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">{{ submission.company.name }}</h6>
+                                                <p class="text-muted small mb-0">
+                                                    <i class="fas fa-industry me-1"></i> {{ submission.company.industry|default:"Not specified" }} |
+                                                    <i class="fas fa-calendar me-1"></i> {{ submission.submitted_at|date:"M d, Y" }}
+                                                </p>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge aqi-{{ submission.aqi_category|lower }} p-2">{{ submission.aqi_category }}</span>
+                                                <div class="text-muted small mt-1">{{ submission.aqi_score }} AQI</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-calculator fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No AQI submissions yet.</p>
+                                <a href="{% url 'aqi_calculator' %}" class="btn btn-sm btn-success">
+                                    <i class="fas fa-plus me-1"></i> Add First Submission
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Thermal Analyses -->
+            <div class="col-lg-4 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-camera text-danger me-2"></i> Recent Thermal Analyses
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_thermal %}
+                            <div class="list-group list-group-flush">
+                                {% for analysis in recent_thermal %}
+                                    <div class="list-group-item px-0">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">{{ analysis.company.name }}</h6>
+                                                <p class="text-muted small mb-0">
+                                                    <i class="fas fa-industry me-1"></i> {{ analysis.company.industry|default:"Not specified" }} |
+                                                    <i class="fas fa-calendar me-1"></i> {{ analysis.analyzed_at|date:"M d, Y" }}
+                                                </p>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge aqi-{{ analysis.thermal_category|lower }} p-2">{{ analysis.thermal_category }}</span>
+                                                <div class="text-muted small mt-1">{{ analysis.points_earned }} Points</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-camera fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No thermal analyses yet.</p>
+                                <a href="{% url 'image_analyzer' %}" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-plus me-1"></i> Add First Analysis
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-gradient-animated text-white wave-bg">
+    <div class="container text-center">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="mb-3 fade-in">Ready to Improve Your Environmental Impact?</h2>
+                <p class="lead mb-4 fade-in" style="animation-delay: 0.1s;">Join thousands of companies tracking and improving their sustainability metrics.</p>
+                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center fade-in" style="animation-delay: 0.2s;">
+                    <a href="{% url 'green_calculator' %}" class="btn btn-light btn-lg px-4 pulse">
+                        <i class="fas fa-leaf me-2"></i> Start with Green Calculator
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

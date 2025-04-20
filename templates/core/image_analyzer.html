@@ -1,0 +1,304 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Thermal Image Analyzer - PureEarth{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-floating label {
+        color: #6c757d;
+    }
+    .drop-zone {
+        border: 2px dashed #ccd0d4;
+        border-radius: 10px;
+        padding: 3rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .drop-zone:hover {
+        background-color: rgba(46, 125, 50, 0.05);
+    }
+    .drop-zone.dragover {
+        background-color: rgba(46, 125, 50, 0.1);
+        border-color: var(--primary-color);
+    }
+    .drop-zone i {
+        font-size: 4rem;
+        color: #ccd0d4;
+        margin-bottom: 1rem;
+    }
+    .drop-zone p {
+        color: #6c757d;
+    }
+    .drop-zone .btn {
+        margin-top: 1rem;
+    }
+    .image-preview {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    #preview-container {
+        display: none;
+        margin-top: 1.5rem;
+    }
+    .thermal-info-card {
+        border-left: 4px solid #00796B;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-6 mb-2">Thermal Image Analyzer</h1>
+                <p class="text-muted">Upload and analyze thermal images to detect heat sources and evaluate environmental impact.</p>
+            </div>
+            <div class="col-lg-6 d-flex justify-content-lg-end">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Thermal Image Analyzer</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Image Analyzer Content -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Information Column -->
+            <div class="col-lg-4 mb-4 mb-lg-0">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-body">
+                        <h4 class="mb-4">How It Works</h4>
+                        
+                        <div class="card mb-3 thermal-info-card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-camera text-primary me-2"></i>Thermal Analysis</h5>
+                                <p class="card-text small text-muted">
+                                    Our thermal image analyzer uses computer vision to:
+                                </p>
+                                <ul class="small text-muted">
+                                    <li>Detect the hottest regions in the image</li>
+                                    <li>Analyze temperature distribution</li>
+                                    <li>Identify potential heat sources</li>
+                                    <li>Categorize the pollution level</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-3 thermal-info-card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-tags text-success me-2"></i>Thermal Categories</h5>
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge aqi-green p-2 me-2">Green</span>
+                                    <span class="small text-muted">Low heat (0-25)</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge aqi-good p-2 me-2">Good</span>
+                                    <span class="small text-muted">Moderate heat (26-50)</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge aqi-average p-2 me-2">Average</span>
+                                    <span class="small text-muted">High heat (51-75)</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge aqi-poor p-2 me-2">Poor</span>
+                                    <span class="small text-muted">Extreme heat (76-100)</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-3 thermal-info-card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-trophy text-warning me-2"></i>Sustainability Points</h5>
+                                <ul class="small text-muted">
+                                    <li><strong>Green:</strong> 100 points</li>
+                                    <li><strong>Good:</strong> 75 points</li>
+                                    <li><strong>Average:</strong> 50 points</li>
+                                    <li><strong>Poor:</strong> 25 points</li>
+                                </ul>
+                                <p class="small text-muted">Points contribute to your company's ranking on the sustainability leaderboard.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Form Column -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow">
+                    <div class="card-header bg-white py-3">
+                        <h4 class="mb-0">Upload Thermal Image</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            <!-- Company Information -->
+                            <h5 class="mb-3">Company Information</h5>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-7">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="company_name" name="company_name" placeholder="Company Name" required>
+                                        <label for="company_name">Company Name</label>
+                                    </div>
+                                    <div class="form-text text-muted small">
+                                        Enter your company name. If it exists in our database, your details will be loaded.
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="company_industry" name="company_industry" placeholder="Industry">
+                                        <label for="company_industry">Industry (Optional)</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Image Upload -->
+                            <h5 class="mb-3">Thermal Image</h5>
+                            <div class="drop-zone" id="drop-zone">
+                                <input type="file" name="thermal_image" id="thermal_image" class="d-none" accept="image/*" required>
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p class="mb-3">Drag and drop a thermal image or click to browse</p>
+                                <p class="small text-muted mb-3">Supported formats: JPG, PNG, TIFF</p>
+                                <button type="button" class="btn btn-outline-primary" id="browse-button">
+                                    <i class="fas fa-folder-open me-2"></i> Browse Files
+                                </button>
+                            </div>
+                            
+                            <!-- Image Preview -->
+                            <div id="preview-container" class="text-center">
+                                <h6 class="mb-3">Image Preview</h6>
+                                <img id="image-preview" class="image-preview mb-3" alt="Thermal image preview">
+                                <button type="button" class="btn btn-sm btn-outline-danger" id="remove-image">
+                                    <i class="fas fa-times me-1"></i> Remove Image
+                                </button>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg px-5">
+                                    <i class="fas fa-camera me-2"></i> Analyze Image
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Elements
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('thermal_image');
+        const browseButton = document.getElementById('browse-button');
+        const imagePreview = document.getElementById('image-preview');
+        const previewContainer = document.getElementById('preview-container');
+        const removeImageButton = document.getElementById('remove-image');
+        
+        // Handle browse button click
+        browseButton.addEventListener('click', function() {
+            fileInput.click();
+        });
+        
+        // Handle file input change
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files && fileInput.files[0]) {
+                displayImagePreview(fileInput.files[0]);
+            }
+        });
+        
+        // Drag and drop events
+        ['dragover', 'dragenter'].forEach(eventName => {
+            dropZone.addEventListener(eventName, function(e) {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+        });
+        
+        ['dragleave', 'dragend'].forEach(eventName => {
+            dropZone.addEventListener(eventName, function() {
+                dropZone.classList.remove('dragover');
+            });
+        });
+        
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                fileInput.files = e.dataTransfer.files;
+                displayImagePreview(e.dataTransfer.files[0]);
+            }
+        });
+        
+        // Remove image button
+        removeImageButton.addEventListener('click', function() {
+            fileInput.value = '';
+            previewContainer.style.display = 'none';
+        });
+        
+        // Function to display image preview
+        function displayImagePreview(file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                previewContainer.style.display = 'block';
+            };
+            
+            reader.readAsDataURL(file);
+        }
+        
+        // Form validation
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+        
+        // Populate company name from existing companies if available
+        const companyNameInput = document.getElementById('company_name');
+        const companyIndustryInput = document.getElementById('company_industry');
+        
+        // Create company list from Django data
+        const companies = [
+            {% for company in companies %}
+                { name: "{{ company.name }}", industry: "{{ company.industry }}" },
+            {% endfor %}
+        ];
+        
+        // Simple autocomplete function
+        companyNameInput.addEventListener('input', function() {
+            const inputVal = this.value.toLowerCase();
+            for (const company of companies) {
+                if (company.name.toLowerCase().includes(inputVal)) {
+                    // Offer to autofill the industry if it exists
+                    if (company.industry && !companyIndustryInput.value) {
+                        companyIndustryInput.value = company.industry;
+                    }
+                    break;
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

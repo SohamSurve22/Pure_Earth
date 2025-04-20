@@ -1,0 +1,484 @@
+{% extends 'core/base.html' %}
+
+{% block title %}AQI Result - PureEarth{% endblock %}
+
+{% block extra_css %}
+<style>
+    .result-circle {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        border: 10px solid;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        margin: 0 auto;
+    }
+    .result-circle.green {
+        border-color: #4CAF50;
+        background-color: rgba(76, 175, 80, 0.1);
+    }
+    .result-circle.good {
+        border-color: #8BC34A;
+        background-color: rgba(139, 195, 74, 0.1);
+    }
+    .result-circle.average {
+        border-color: #FFC107;
+        background-color: rgba(255, 193, 7, 0.1);
+    }
+    .result-circle.poor {
+        border-color: #F44336;
+        background-color: rgba(244, 67, 54, 0.1);
+    }
+    
+    .aqi-score {
+        font-size: 3rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+    
+    .input-data-row {
+        border-bottom: 1px solid #f0f0f0;
+        padding: 8px 0;
+    }
+    .input-data-row:last-child {
+        border-bottom: none;
+    }
+    
+    .speedometer {
+        position: relative;
+        width: 320px;
+        height: 160px;
+        margin: 0 auto;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 160'%3E%3Cdefs%3E%3ClinearGradient id='gradient' x1='0%25' y1='0%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' style='stop-color:%234CAF50'/%3E%3Cstop offset='33%25' style='stop-color:%238BC34A'/%3E%3Cstop offset='66%25' style='stop-color:%23FFC107'/%3E%3Cstop offset='100%25' style='stop-color:%23F44336'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M 10 150 A 150 150 0 0 1 310 150' stroke='url(%23gradient)' stroke-width='20' fill='none'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+    }
+    
+    .needle {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 4px;
+        height: 140px;
+        background-color: #666;
+        transform-origin: bottom center;
+        transition: transform 2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    .needle::before {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: -8px;
+        width: 20px;
+        height: 20px;
+        background-color: #666;
+        border-radius: 50%;
+    }
+    
+    .needle::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -6px;
+        width: 16px;
+        height: 16px;
+        background-color: #d32f2f;
+        border-radius: 50%;
+    }
+    
+    .speedometer-markers {
+        position: absolute;
+        bottom: 10px;
+        left: 0;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .marker {
+        font-size: 12px;
+        color: #666;
+        text-align: center;
+        width: 30px;
+    }
+    
+    .marker.first {
+        transform: translateX(20px);
+    }
+    
+    .marker.last {
+        transform: translateX(-20px);
+    }
+    
+    .recommendation-card {
+        border-left: 4px solid;
+        margin-bottom: 15px;
+    }
+    
+    .recommendation-card.green {
+        border-color: #4CAF50;
+    }
+    
+    .recommendation-card.good {
+        border-color: #8BC34A;
+    }
+    
+    .recommendation-card.average {
+        border-color: #FFC107;
+    }
+    
+    .recommendation-card.poor {
+        border-color: #F44336;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-6 mb-2">AQI Result</h1>
+                <p class="text-muted">Detailed sustainability analysis for {{ submission.company.name }}</p>
+            </div>
+            <div class="col-lg-6 d-flex justify-content-lg-end">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'aqi_calculator' %}">AQI Calculator</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Result</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- AQI Result Content -->
+<section class="py-5">
+    <div class="container">
+        <!-- Company Information Header -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h3>{{ submission.company.name }}</h3>
+                                <p class="text-muted mb-3">
+                                    <i class="fas fa-industry me-2"></i> {{ submission.company.industry|default:"Industry not specified" }}
+                                </p>
+                                <p class="mb-0">
+                                    <span class="badge aqi-{{ submission.aqi_category|lower }} p-2">{{ submission.aqi_category }}</span>
+                                    <span class="text-muted ms-2">Submitted on {{ submission.submitted_at|date:"F d, Y" }}</span>
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                <div class="d-flex align-items-center justify-content-md-end">
+                                    <i class="fas fa-trophy fa-2x text-warning me-2"></i>
+                                    <div>
+                                        <span class="d-block fs-4 fw-bold">{{ submission.points_earned }}</span>
+                                        <span class="text-muted small">Sustainability Points</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <!-- AQI Score Visual -->
+            <div class="col-lg-6 mb-4">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">AQI Score</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="result-circle {{ submission.aqi_category|lower }} mb-4">
+                            <div class="aqi-score">{{ submission.aqi_score|floatformat:1 }}</div>
+                            <div>AQI Score</div>
+                        </div>
+                        
+                        <div class="speedometer">
+                            <div class="needle" id="aqi-needle"></div>
+                            <div class="speedometer-markers">
+                                <div class="marker first">0</div>
+                                <div class="marker">50</div>
+                                <div class="marker">100</div>
+                                <div class="marker">150</div>
+                                <div class="marker last">200+</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Input Data Summary -->
+            <div class="col-lg-6 mb-4">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">Input Data</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-data-row">
+                            <div class="row">
+                                <div class="col-7 col-md-9">
+                                    <span class="text-muted"><i class="fas fa-bolt me-2"></i> Energy Consumption:</span>
+                                </div>
+                                <div class="col-5 col-md-3 text-end">
+                                    <strong>{{ submission.energy_consumption|floatformat:1 }}</strong> kWh
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-data-row">
+                            <div class="row">
+                                <div class="col-7 col-md-9">
+                                    <span class="text-muted"><i class="fas fa-gas-pump me-2"></i> Fuel Type:</span>
+                                </div>
+                                <div class="col-5 col-md-3 text-end">
+                                    <strong>{{ submission.fuel_type }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-data-row">
+                            <div class="row">
+                                <div class="col-7 col-md-9">
+                                    <span class="text-muted"><i class="fas fa-box me-2"></i> Production Output:</span>
+                                </div>
+                                <div class="col-5 col-md-3 text-end">
+                                    <strong>{{ submission.production_output|floatformat:1 }}</strong> units
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-data-row">
+                            <div class="row">
+                                <div class="col-7 col-md-9">
+                                    <span class="text-muted"><i class="fas fa-smog me-2"></i> Waste Emissions:</span>
+                                </div>
+                                <div class="col-5 col-md-3 text-end">
+                                    <strong>{{ submission.waste_emissions|floatformat:1 }}</strong> tons
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-data-row">
+                            <div class="row">
+                                <div class="col-7 col-md-9">
+                                    <span class="text-muted"><i class="fas fa-truck me-2"></i> Vehicles Operated:</span>
+                                </div>
+                                <div class="col-5 col-md-3 text-end">
+                                    <strong>{{ submission.vehicles_operated }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-data-row">
+                            <div class="row">
+                                <div class="col-7 col-md-9">
+                                    <span class="text-muted"><i class="fas fa-wind me-2"></i> Wind Speed:</span>
+                                </div>
+                                <div class="col-5 col-md-3 text-end">
+                                    <strong>{{ submission.wind_speed|floatformat:1 }}</strong> m/s
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-data-row">
+                            <div class="row">
+                                <div class="col-7 col-md-9">
+                                    <span class="text-muted"><i class="fas fa-cloud-rain me-2"></i> Rainfall:</span>
+                                </div>
+                                <div class="col-5 col-md-3 text-end">
+                                    <strong>{{ submission.rainfall|floatformat:1 }}</strong> mm
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recommendations & Analysis -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">Recommendations & Analysis</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="lead mb-4">Based on your AQI score of <strong>{{ submission.aqi_score|floatformat:1 }}</strong>, 
+                        we've generated the following recommendations to improve your environmental impact:</p>
+                        
+                        {% if submission.aqi_category == 'Green' %}
+                            <div class="recommendation-card green card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title text-success"><i class="fas fa-check-circle me-2"></i>Excellent Performance</h5>
+                                    <p class="card-text">Your company demonstrates exceptional environmental practices with minimal pollution output. Continue your excellent work!</p>
+                                </div>
+                            </div>
+                            
+                            <div class="recommendation-card green card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-leaf me-2"></i>Maintain Sustainability Leadership</h5>
+                                    <p class="card-text">Consider sharing your best practices with other companies to promote industry-wide sustainability improvements.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="recommendation-card green card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-chart-line me-2"></i>Set New Goals</h5>
+                                    <p class="card-text">Aim for carbon neutrality or even carbon negativity to push environmental standards even further in your industry.</p>
+                                </div>
+                            </div>
+                        {% elif submission.aqi_category == 'Good' %}
+                            <div class="recommendation-card good card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title text-success"><i class="fas fa-thumbs-up me-2"></i>Strong Performance</h5>
+                                    <p class="card-text">Your company is performing well with minimal environmental impact. There's still room for improvement to reach the Green category.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="recommendation-card good card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-bolt me-2"></i>Energy Optimization</h5>
+                                    <p class="card-text">Consider an energy audit to identify opportunities for reducing consumption through efficiency measures or renewable energy sources.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="recommendation-card good card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-recycle me-2"></i>Waste Reduction</h5>
+                                    <p class="card-text">Implement additional waste reduction strategies and recycling programs to further minimize your waste emissions.</p>
+                                </div>
+                            </div>
+                        {% elif submission.aqi_category == 'Average' %}
+                            <div class="recommendation-card average card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title text-warning"><i class="fas fa-exclamation-triangle me-2"></i>Improvement Needed</h5>
+                                    <p class="card-text">Your company shows moderate environmental impact. Implementing the following changes can help improve your score significantly.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="recommendation-card average card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-gas-pump me-2"></i>Fuel Transition Plan</h5>
+                                    <p class="card-text">Develop a transition plan to shift from {{ submission.fuel_type }} to cleaner fuel sources like natural gas or renewable energy.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="recommendation-card average card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-truck me-2"></i>Fleet Optimization</h5>
+                                    <p class="card-text">Consider switching to electric or hybrid vehicles to reduce emissions from your vehicle fleet of {{ submission.vehicles_operated }} vehicles.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="recommendation-card average card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-industry me-2"></i>Production Efficiency</h5>
+                                    <p class="card-text">Invest in more efficient production technologies to reduce waste and energy usage per unit of production.</p>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="recommendation-card poor card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title text-danger"><i class="fas fa-exclamation-circle me-2"></i>Immediate Action Required</h5>
+                                    <p class="card-text">Your company has a significant environmental impact. Consider implementing these changes as soon as possible.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="recommendation-card poor card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-bolt me-2"></i>Energy Audit & Reduction</h5>
+                                    <p class="card-text">Conduct a comprehensive energy audit to identify major sources of energy waste. Your consumption of {{ submission.energy_consumption|floatformat:1 }} kWh is significantly higher than recommended levels.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="recommendation-card poor card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-smog me-2"></i>Waste Management Overhaul</h5>
+                                    <p class="card-text">Implement a comprehensive waste management and reduction program. Your waste emissions of {{ submission.waste_emissions|floatformat:1 }} tons far exceed sustainable levels.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="recommendation-card poor card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-gas-pump me-2"></i>Fuel Source Transition</h5>
+                                    <p class="card-text">Develop an immediate plan to transition from {{ submission.fuel_type }} to cleaner alternatives. This single change could significantly improve your AQI score.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="recommendation-card poor card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-file-contract me-2"></i>Environmental Consultation</h5>
+                                    <p class="card-text">Consider engaging environmental consultants to develop a comprehensive sustainability plan for your company.</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Next Steps -->
+                        <div class="text-center mt-5">
+                            <h5 class="mb-3">Next Steps</h5>
+                            <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
+                                <a href="{% url 'aqi_calculator' %}" class="btn btn-outline-success">
+                                    <i class="fas fa-sync-alt me-2"></i> Calculate Another AQI
+                                </a>
+                                <a href="{% url 'image_analyzer' %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-camera me-2"></i> Analyze Thermal Images
+                                </a>
+                                <a href="{% url 'leaderboard' %}" class="btn btn-outline-warning">
+                                    <i class="fas fa-trophy me-2"></i> View Leaderboard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Calculate needle rotation based on AQI value
+        const aqiValue = {{ submission.aqi_score }};
+        const maxAQI = 200; // Maximum value displayed on the speedometer
+        const normalizedAQI = Math.min(aqiValue, maxAQI) / maxAQI;
+        const rotationDegrees = normalizedAQI * 180 - 90; // -90 to 90 degrees
+        
+        const needle = document.getElementById('aqi-needle');
+        setTimeout(() => {
+            needle.style.transform = `rotate(${rotationDegrees}deg)`;
+        }, 500);
+        
+        // Animated counting for AQI score
+        const aqiScoreElements = document.querySelectorAll('.aqi-score');
+        
+        aqiScoreElements.forEach(element => {
+            const finalValue = parseFloat(element.textContent);
+            let startValue = 0;
+            const duration = 2000; // 2 seconds
+            const step = Math.max(1, Math.floor(finalValue / (duration / 16))); // 60fps
+            
+            const animateValue = () => {
+                startValue += step;
+                if (startValue > finalValue) {
+                    startValue = finalValue;
+                }
+                
+                element.textContent = startValue.toFixed(1);
+                
+                if (startValue < finalValue) {
+                    requestAnimationFrame(animateValue);
+                }
+            };
+            
+            requestAnimationFrame(animateValue);
+        });
+    });
+</script>
+{% endblock %}

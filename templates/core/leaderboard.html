@@ -1,0 +1,514 @@
+{% extends 'core/base.html' %}
+{% load core_extras %}
+
+{% block title %}Sustainability Leaderboard - PureEarth{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Professional Leaderboard Styling */
+    .leaderboard-container {
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+    
+    .leaderboard-header {
+        background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
+        color: white;
+        border-radius: 12px 12px 0 0;
+        padding: 20px;
+    }
+    
+    .leaderboard-body {
+        padding: 0;
+    }
+    
+    .company-row {
+        border-left: 5px solid transparent;
+        transition: all 0.3s ease;
+        position: relative;
+        padding: 20px;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .company-row:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+        border-left-color: #43a047;
+    }
+    
+    .company-row.top-1 {
+        border-left-color: #FFD700;
+        background-color: rgba(255, 215, 0, 0.05);
+    }
+    
+    .company-row.top-2 {
+        border-left-color: #C0C0C0;
+        background-color: rgba(192, 192, 192, 0.05);
+    }
+    
+    .company-row.top-3 {
+        border-left-color: #CD7F32;
+        background-color: rgba(205, 127, 50, 0.05);
+    }
+    
+    .rank-badge {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-weight: 700;
+        font-size: 1.2rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .rank-1 {
+        background: linear-gradient(135deg, #ffeb3b 0%, #ffc107 100%);
+        color: #212529;
+    }
+    
+    .rank-2 {
+        background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%);
+        color: #212529;
+    }
+    
+    .rank-3 {
+        background: linear-gradient(135deg, #d7ccc8 0%, #a1887f 100%);
+        color: #212529;
+    }
+    
+    .rank-other {
+        background: #eceff1;
+        color: #546e7a;
+    }
+    
+    .trophy-icon {
+        color: #FFD700;
+        margin-right: 5px;
+        filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+    }
+    
+    .company-name {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+    
+    .industry-tag {
+        display: inline-block;
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        background-color: #e3f2fd;
+        color: #1976d2;
+        border-radius: 4px;
+        margin-left: 8px;
+    }
+    
+    .submission-count {
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        color: #757575;
+        border-radius: 4px;
+        margin-left: 8px;
+    }
+    
+    .score-badge {
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 30px;
+        margin-right: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .score-green {
+        background-color: rgba(76, 175, 80, 0.15);
+        color: #2E7D32;
+        border: 1px solid rgba(76, 175, 80, 0.3);
+    }
+    
+    .score-aqi {
+        background-color: rgba(3, 169, 244, 0.15);
+        color: #0277bd;
+        border: 1px solid rgba(3, 169, 244, 0.3);
+    }
+    
+    .score-thermal {
+        background-color: rgba(255, 152, 0, 0.15);
+        color: #e65100;
+        border: 1px solid rgba(255, 152, 0, 0.3);
+    }
+    
+    .score-total {
+        background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(27, 94, 32, 0.2) 100%);
+        color: #1b5e20;
+        border: 1px solid rgba(76, 175, 80, 0.3);
+        font-weight: 700;
+    }
+    
+    .status-tag {
+        display: inline-block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 4px;
+    }
+    
+    .status-green {
+        background-color: #c8e6c9;
+        color: #2e7d32;
+    }
+    
+    .status-ontrack {
+        background-color: #fff9c4;
+        color: #f57f17;
+    }
+    
+    .status-needs {
+        background-color: #ffccbc;
+        color: #d84315;
+    }
+    
+    .status-not {
+        background-color: #ffcdd2;
+        color: #c62828;
+    }
+    
+    .progress-container {
+        margin-top: 15px;
+    }
+    
+    .score-progress {
+        height: 8px;
+        border-radius: 4px;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        background-color: #eceff1;
+        overflow: hidden;
+    }
+    
+    .progress-segment {
+        height: 100%;
+        float: left;
+        transition: width 0.5s ease;
+    }
+    
+    .progress-green {
+        background: linear-gradient(90deg, #66bb6a 0%, #43a047 100%);
+    }
+    
+    .progress-aqi {
+        background: linear-gradient(90deg, #29b6f6 0%, #0288d1 100%);
+    }
+    
+    .progress-thermal {
+        background: linear-gradient(90deg, #ffa726 0%, #f57c00 100%);
+    }
+    
+    .progress-legend {
+        display: flex;
+        justify-content: center;
+        margin-top: 5px;
+        font-size: 0.75rem;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin: 0 8px;
+    }
+    
+    .legend-color {
+        width: 12px;
+        height: 12px;
+        margin-right: 5px;
+        border-radius: 2px;
+    }
+    
+    .legend-green {
+        background: linear-gradient(90deg, #66bb6a 0%, #43a047 100%);
+    }
+    
+    .legend-aqi {
+        background: linear-gradient(90deg, #29b6f6 0%, #0288d1 100%);
+    }
+    
+    .legend-thermal {
+        background: linear-gradient(90deg, #ffa726 0%, #f57c00 100%);
+    }
+    
+    /* Animation for the top company */
+    @keyframes shine {
+        0% {
+            background-position: -100px;
+        }
+        100% {
+            background-position: 200px;
+        }
+    }
+    
+    .top-company-shine {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .top-company-shine::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+                                   rgba(255,255,255,0) 0%, 
+                                   rgba(255,255,255,0.2) 50%, 
+                                   rgba(255,255,255,0) 100%);
+        background-size: 200px 100%;
+        background-repeat: no-repeat;
+        background-position: -100px;
+        animation: shine 2s infinite linear;
+        pointer-events: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-6 mb-2">Sustainability Leaderboard</h1>
+                <p class="text-muted">Compare environmental performance across companies and industries.</p>
+            </div>
+            <div class="col-lg-6 d-flex justify-content-lg-end">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Leaderboard</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Leaderboard Content -->
+<section class="py-5">
+    <div class="container">
+        <!-- How It Works Section -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h3 class="card-title mb-4">How Company Rankings Work</h3>
+                        
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-shrink-0">
+                                        <div class="rounded-circle bg-success bg-opacity-10 p-3">
+                                            <i class="fas fa-leaf text-success fa-2x"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ms-3">
+                                        <h5>Green Score (60%)</h5>
+                                        <p class="text-muted mb-0">Comprehensive sustainability assessment across multiple environmental metrics.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-shrink-0">
+                                        <div class="rounded-circle bg-info bg-opacity-10 p-3">
+                                            <i class="fas fa-wind text-info fa-2x"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ms-3">
+                                        <h5>AQI Score (15%)</h5>
+                                        <p class="text-muted mb-0">Air quality index measurements and emissions control practices.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-shrink-0">
+                                        <div class="rounded-circle bg-warning bg-opacity-10 p-3">
+                                            <i class="fas fa-temperature-high text-warning fa-2x"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ms-3">
+                                        <h5>Thermal Score (25%)</h5>
+                                        <p class="text-muted mb-0">Thermal signature analysis for energy efficiency and heat management.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leaderboard Rankings -->
+        <div class="leaderboard-container">
+            <div class="leaderboard-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">Company Rankings</h3>
+                    <div class="text-white-50">Updated: {% now "F j, Y" %}</div>
+                </div>
+            </div>
+            
+            <div class="leaderboard-body">
+                {% if leaderboard_entries %}
+                    {% for entry in leaderboard_entries %}
+                        <div class="company-row {% if forloop.counter == 1 %}top-1 top-company-shine{% elif forloop.counter == 2 %}top-2{% elif forloop.counter == 3 %}top-3{% endif %}">
+                            <div class="row align-items-center">
+                                <!-- Rank -->
+                                <div class="col-auto">
+                                    <div class="rank-badge {% if forloop.counter == 1 %}rank-1{% elif forloop.counter == 2 %}rank-2{% elif forloop.counter == 3 %}rank-3{% else %}rank-other{% endif %}">
+                                        {{ forloop.counter }}
+                                    </div>
+                                </div>
+                                
+                                <!-- Company Details -->
+                                <div class="col">
+                                    <div class="company-details">
+                                        <h4 class="company-name">
+                                            {{ entry.company.name }}
+                                            {% if forloop.counter == 1 %}
+                                                <i class="fas fa-crown trophy-icon"></i>
+                                            {% endif %}
+                                        </h4>
+                                        <div class="d-flex flex-wrap align-items-center mt-1">
+                                            <span class="industry-tag">
+                                                <i class="fas fa-industry me-1"></i>
+                                                {{ entry.company.industry|default:"Industry not specified" }}
+                                            </span>
+                                            <span class="submission-count">
+                                                <i class="fas fa-chart-bar me-1"></i>
+                                                {{ entry.submissions_count }} submission{{ entry.submissions_count|pluralize }}
+                                            </span>
+                                            
+                                            <span class="status-tag ms-2 
+                                                {% if 'Green Certified' in entry.status %}status-green
+                                                {% elif 'On Track' in entry.status %}status-ontrack
+                                                {% elif 'Needs Improvement' in entry.status %}status-needs
+                                                {% else %}status-not{% endif %}">
+                                                {{ entry.status }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Score Badges -->
+                                    <div class="d-flex flex-wrap mt-3 score-badges">
+                                        <div class="score-badge score-total">
+                                            <i class="fas fa-star me-1"></i>
+                                            {{ entry.total_score|floatformat:1 }} Total
+                                        </div>
+                                        
+                                        {% if entry.green_score %}
+                                        <div class="score-badge score-green">
+                                            <i class="fas fa-leaf me-1"></i>
+                                            {{ entry.green_score|floatformat:1 }} Green
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if entry.aqi_points %}
+                                        <div class="score-badge score-aqi">
+                                            <i class="fas fa-wind me-1"></i>
+                                            {{ entry.aqi_points|floatformat:1 }} AQI
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if entry.thermal_points %}
+                                        <div class="score-badge score-thermal">
+                                            <i class="fas fa-temperature-high me-1"></i>
+                                            {{ entry.thermal_points|floatformat:1 }} Thermal
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Progress Bar -->
+                                    <div class="progress-container">
+                                        <div class="score-progress">
+                                            {% if entry.green_score %}
+                                            <div class="progress-segment progress-green" style="width: {{ entry.green_score_pct }}%;"></div>
+                                            {% endif %}
+                                            
+                                            {% if entry.aqi_points %}
+                                            <div class="progress-segment progress-aqi" style="width: {{ entry.aqi_points_pct }}%;"></div>
+                                            {% endif %}
+                                            
+                                            {% if entry.thermal_points %}
+                                            <div class="progress-segment progress-thermal" style="width: {{ entry.thermal_points_pct }}%;"></div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="progress-legend">
+                                            {% if entry.green_score %}
+                                            <div class="legend-item">
+                                                <div class="legend-color legend-green"></div>
+                                                <div>Green (60%)</div>
+                                            </div>
+                                            {% endif %}
+                                            
+                                            {% if entry.aqi_points %}
+                                            <div class="legend-item">
+                                                <div class="legend-color legend-aqi"></div>
+                                                <div>AQI (15%)</div>
+                                            </div>
+                                            {% endif %}
+                                            
+                                            {% if entry.thermal_points %}
+                                            <div class="legend-item">
+                                                <div class="legend-color legend-thermal"></div>
+                                                <div>Thermal (25%)</div>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="p-5 text-center">
+                        <div class="py-5">
+                            <i class="fas fa-leaf fa-4x text-muted mb-3"></i>
+                            <h3 class="mb-3">No Companies Yet</h3>
+                            <p class="text-muted">Submit sustainability data for your company to be featured on the leaderboard.</p>
+                            <a href="{% url 'green_calculator' %}" class="btn btn-primary mt-3">
+                                <i class="fas fa-calculator me-2"></i>Calculate Green Score
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Call to Action -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card border-0 bg-primary text-white p-4 shadow-sm">
+                    <div class="card-body text-center py-5">
+                        <h2 class="mb-4">Improve Your Sustainability Ranking</h2>
+                        <p class="lead mb-4">Calculate your company's Green Score and implement recommended improvements to climb the leaderboard.</p>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                            <a href="{% url 'green_calculator' %}" class="btn btn-light btn-lg px-4 py-2">
+                                <i class="fas fa-calculator me-2"></i>Calculate Green Score
+                            </a>
+                            <a href="{% url 'image_analyzer' %}" class="btn btn-outline-light btn-lg px-4 py-2">
+                                <i class="fas fa-temperature-high me-2"></i>Analyze Thermal Data
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

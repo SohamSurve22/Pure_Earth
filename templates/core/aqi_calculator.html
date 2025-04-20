@@ -1,0 +1,341 @@
+{% extends 'core/base.html' %}
+
+{% block title %}AQI Calculator - PureEarth{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-floating label {
+        color: #6c757d;
+    }
+    .input-group-text {
+        color: #2E7D32;
+        background-color: #f8f9fa;
+        border-right: none;
+    }
+    .form-control {
+        border-left: none;
+    }
+    .form-control:focus {
+        border-color: #ced4da;
+        box-shadow: none;
+    }
+    .form-floating-group {
+        position: relative;
+    }
+    .form-floating-group .form-floating {
+        flex-grow: 1;
+    }
+    .form-floating-group .input-group-text {
+        height: 58px;
+        display: flex;
+        align-items: center;
+    }
+    .info-tooltip {
+        cursor: pointer;
+        color: #2E7D32;
+    }
+    .aqi-info-card {
+        border-left: 4px solid #2E7D32;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-6 mb-2">AQI Calculator</h1>
+                <p class="text-muted">Calculate your company's Air Quality Index (AQI) and receive sustainability points.</p>
+            </div>
+            <div class="col-lg-6 d-flex justify-content-lg-end">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">AQI Calculator</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- AQI Calculator Content -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Information Column -->
+            <div class="col-lg-4 mb-4 mb-lg-0">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-body">
+                        <h4 class="mb-4">How It Works</h4>
+                        
+                        <div class="card mb-3 aqi-info-card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-lightbulb text-warning me-2"></i>AQI Formula</h5>
+                                <p class="card-text small text-muted">
+                                    Our AQI calculation uses a weighted formula that considers:
+                                </p>
+                                <ul class="small text-muted">
+                                    <li>Energy consumption (30% weight)</li>
+                                    <li>Fuel type (25% weight)</li>
+                                    <li>Waste emissions (20% weight)</li>
+                                    <li>Vehicles operated (15% weight)</li>
+                                    <li>Wind speed (5% reduction)</li>
+                                    <li>Rainfall (5% reduction)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-3 aqi-info-card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-tags text-success me-2"></i>AQI Categories</h5>
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge aqi-green p-2 me-2">Green</span>
+                                    <span class="small text-muted">0-50 (Excellent)</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge aqi-good p-2 me-2">Good</span>
+                                    <span class="small text-muted">51-100 (Good)</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge aqi-average p-2 me-2">Average</span>
+                                    <span class="small text-muted">101-150 (Moderate)</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge aqi-poor p-2 me-2">Poor</span>
+                                    <span class="small text-muted">151+ (Poor)</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-3 aqi-info-card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-trophy text-primary me-2"></i>Sustainability Points</h5>
+                                <ul class="small text-muted">
+                                    <li><strong>Green:</strong> 100 points</li>
+                                    <li><strong>Good:</strong> 75 points</li>
+                                    <li><strong>Average:</strong> 50 points</li>
+                                    <li><strong>Poor:</strong> 25 points</li>
+                                </ul>
+                                <p class="small text-muted">Points contribute to your company's ranking on the sustainability leaderboard.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Form Column -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow">
+                    <div class="card-header bg-white py-3">
+                        <h4 class="mb-0">Input Company Data</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            <!-- Company Information -->
+                            <h5 class="mb-3">Company Information</h5>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-7">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="company_name" name="company_name" placeholder="Company Name" required>
+                                        <label for="company_name">Company Name</label>
+                                    </div>
+                                    <div class="form-text text-muted small">
+                                        Enter your company name. If it exists in our database, your details will be loaded.
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="company_industry" name="company_industry" placeholder="Industry">
+                                        <label for="company_industry">Industry (Optional)</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Energy & Production -->
+                            <h5 class="mb-3">Energy & Production</h5>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <div class="form-floating-group d-flex">
+                                        <div class="input-group-text">
+                                            <i class="fas fa-bolt"></i>
+                                        </div>
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control" id="energy_consumption" name="energy_consumption" placeholder="Energy Consumption" min="0" step="0.01" required>
+                                            <label for="energy_consumption">Energy Consumption</label>
+                                        </div>
+                                        <div class="input-group-text">
+                                            kWh
+                                            <a data-bs-toggle="tooltip" title="Average daily energy consumption in kilowatt hours" class="ms-1 info-tooltip">
+                                                <i class="fas fa-info-circle"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating-group d-flex">
+                                        <div class="input-group-text">
+                                            <i class="fas fa-box"></i>
+                                        </div>
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control" id="production_output" name="production_output" placeholder="Production Output" min="0" step="0.01" required>
+                                            <label for="production_output">Production Output</label>
+                                        </div>
+                                        <div class="input-group-text">
+                                            units
+                                            <a data-bs-toggle="tooltip" title="Daily output of products or services" class="ms-1 info-tooltip">
+                                                <i class="fas fa-info-circle"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Emissions & Fuel -->
+                            <h5 class="mb-3">Emissions & Fuel</h5>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <div class="form-floating-group d-flex">
+                                        <div class="input-group-text">
+                                            <i class="fas fa-smog"></i>
+                                        </div>
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control" id="waste_emissions" name="waste_emissions" placeholder="Waste Emissions" min="0" step="0.01" required>
+                                            <label for="waste_emissions">Waste Emissions</label>
+                                        </div>
+                                        <div class="input-group-text">
+                                            tons
+                                            <a data-bs-toggle="tooltip" title="Daily waste emissions in tons" class="ms-1 info-tooltip">
+                                                <i class="fas fa-info-circle"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating-group d-flex">
+                                        <div class="input-group-text">
+                                            <i class="fas fa-gas-pump"></i>
+                                        </div>
+                                        <div class="form-floating">
+                                            <select class="form-select" id="fuel_type" name="fuel_type" required>
+                                                <option value="" selected disabled>Select fuel type</option>
+                                                {% for fuel in fuel_types %}
+                                                <option value="{{ fuel }}">{{ fuel }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <label for="fuel_type">Primary Fuel Type</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Vehicles & Environmental Factors -->
+                            <h5 class="mb-3">Vehicles & Environmental Factors</h5>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-4">
+                                    <div class="form-floating-group d-flex">
+                                        <div class="input-group-text">
+                                            <i class="fas fa-truck"></i>
+                                        </div>
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control" id="vehicles_operated" name="vehicles_operated" placeholder="Vehicles Operated" min="0" step="1" required>
+                                            <label for="vehicles_operated">Vehicles</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-floating-group d-flex">
+                                        <div class="input-group-text">
+                                            <i class="fas fa-wind"></i>
+                                        </div>
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control" id="wind_speed" name="wind_speed" placeholder="Wind Speed" min="0" step="0.1" required>
+                                            <label for="wind_speed">Wind Speed</label>
+                                        </div>
+                                        <div class="input-group-text">
+                                            m/s
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-floating-group d-flex">
+                                        <div class="input-group-text">
+                                            <i class="fas fa-cloud-rain"></i>
+                                        </div>
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control" id="rainfall" name="rainfall" placeholder="Rainfall" min="0" step="0.1" required>
+                                            <label for="rainfall">Rainfall</label>
+                                        </div>
+                                        <div class="input-group-text">
+                                            mm
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-success btn-lg px-5">
+                                    <i class="fas fa-calculator me-2"></i> Calculate AQI
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Enable Bootstrap tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+        
+        // Form validation
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+        
+        // Populate company name from existing companies if available
+        const companyNameInput = document.getElementById('company_name');
+        const companyIndustryInput = document.getElementById('company_industry');
+        
+        // Create company list from Django data
+        const companies = [
+            {% for company in companies %}
+                { name: "{{ company.name }}", industry: "{{ company.industry }}" },
+            {% endfor %}
+        ];
+        
+        // Simple autocomplete function
+        companyNameInput.addEventListener('input', function() {
+            const inputVal = this.value.toLowerCase();
+            for (const company of companies) {
+                if (company.name.toLowerCase().includes(inputVal)) {
+                    // Offer to autofill the industry if it exists
+                    if (company.industry && !companyIndustryInput.value) {
+                        companyIndustryInput.value = company.industry;
+                    }
+                    break;
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

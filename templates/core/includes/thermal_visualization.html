@@ -1,0 +1,109 @@
+<!-- Main visualization image with tabs for different views -->
+<div class="card border-0 shadow h-100">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Thermal Image Analysis</h5>
+        
+        <!-- Visualization type selector tabs -->
+        <ul class="nav nav-pills viz-selector" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="main-tab" data-bs-toggle="tab" href="#main-viz" role="tab">
+                    <i class="fas fa-search me-2"></i>Main
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="heatmap-tab" data-bs-toggle="tab" href="#heatmap" role="tab">
+                    <i class="fas fa-fire me-2"></i>Heatmap
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="rectangles-tab" data-bs-toggle="tab" href="#rectangles" role="tab">
+                    <i class="fas fa-vector-square me-2"></i>Regions
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="contours-tab" data-bs-toggle="tab" href="#contours" role="tab">
+                    <i class="fas fa-draw-polygon me-2"></i>Contours
+                </a>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="card-body text-center p-0 position-relative">
+        <div class="tab-content">
+            <!-- Main visualization tab -->
+            <div class="tab-pane fade show active" id="main-viz" role="tabpanel">
+                {% if analysis.visualization_base64 %}
+                    <img src="data:image/png;base64,{{ analysis.visualization_base64 }}" 
+                         alt="Thermal analysis visualization" 
+                         class="img-fluid thermal-viz">
+                {% else %}
+                    <div class="p-5 text-center">
+                        <i class="fas fa-image fa-5x text-muted mb-3"></i>
+                        <p class="text-muted">Visualization not available</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Heatmap visualization tab -->
+            <div class="tab-pane fade" id="heatmap" role="tabpanel">
+                {% if analysis.heatmap_base64 %}
+                    <img src="data:image/png;base64,{{ analysis.heatmap_base64 }}" 
+                         alt="Thermal heatmap" 
+                         class="img-fluid thermal-viz">
+                    <div class="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-75 text-white p-2 small">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Colorized heatmap showing temperature distribution (blue=cool, red=hot)
+                    </div>
+                {% else %}
+                    <div class="p-5 text-center">
+                        <i class="fas fa-fire-alt fa-5x text-muted mb-3"></i>
+                        <p class="text-muted">Heatmap not available</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Rectangles visualization tab -->
+            <div class="tab-pane fade" id="rectangles" role="tabpanel">
+                {% if analysis.rectangle_base64 %}
+                    <img src="data:image/png;base64,{{ analysis.rectangle_base64 }}" 
+                         alt="Heat source regions" 
+                         class="img-fluid thermal-viz">
+                    <div class="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-75 text-white p-2 small">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Bounding rectangles around detected heat sources
+                    </div>
+                {% else %}
+                    <div class="p-5 text-center">
+                        <i class="fas fa-vector-square fa-5x text-muted mb-3"></i>
+                        <p class="text-muted">Region visualization not available</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Contours visualization tab -->
+            <div class="tab-pane fade" id="contours" role="tabpanel">
+                {% if analysis.contour_base64 %}
+                    <img src="data:image/png;base64,{{ analysis.contour_base64 }}" 
+                         alt="Heat source contours" 
+                         class="img-fluid thermal-viz">
+                    <div class="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-75 text-white p-2 small">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Exact contours of heat sources detected in the image
+                    </div>
+                {% else %}
+                    <div class="p-5 text-center">
+                        <i class="fas fa-draw-polygon fa-5x text-muted mb-3"></i>
+                        <p class="text-muted">Contour visualization not available</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden JSON data for client-side usage -->
+{% if analysis.heat_sources_json %}
+<script id="heat-sources-data" type="application/json">
+    {{ analysis.heat_sources_json|safe }}
+</script>
+{% endif %}

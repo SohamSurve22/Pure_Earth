@@ -1,0 +1,43 @@
+                        <div class="analysis-metric">
+                            <h6 class="mb-3">Detected Heat Sources</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Size</th>
+                                            <th>Temperature</th>
+                                            <th>Status</th>
+                                            <th>Location</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% if analysis.heat_sources_json %}
+                                            {% with heat_sources=analysis.heat_sources_json|parse_json %}
+                                                {% for source in heat_sources %}
+                                                    <tr>
+                                                        <td>{{ source.id }}</td>
+                                                        <td>{{ source.area|floatformat:0 }} px</td>
+                                                        <td>{{ source.temperature|floatformat:1 }}</td>
+                                                        <td>
+                                                            {% if source.is_large %}
+                                                                <span class="badge bg-danger">Large</span>
+                                                            {% else %}
+                                                                <span class="badge bg-info">Normal</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>({{ source.x|floatformat:0 }}, {{ source.y|floatformat:0 }})</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            {% endwith %}
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="5" class="text-center py-3">
+                                                    <span class="text-muted">No detailed heat source data available.</span>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>

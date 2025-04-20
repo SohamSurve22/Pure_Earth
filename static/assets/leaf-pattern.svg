@@ -1,0 +1,51 @@
+<svg width="250" height="250" viewBox="0 0 250 250" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="leaf-pattern" x="0" y="0" width="250" height="250" patternUnits="userSpaceOnUse">
+      <!-- First leaf -->
+      <g opacity="0.05">
+        <path d="M50 50 Q70 20 90 50 Q110 80 90 110 Q70 140 50 110 Q30 80 50 50Z" fill="#4CAF50"/>
+        <path d="M50 50 Q50 80 50 110" stroke="#2E7D32" stroke-width="2" fill="none"/>
+        <path d="M50 70 Q40 75 30 73" stroke="#2E7D32" stroke-width="1" fill="none"/>
+        <path d="M50 70 Q60 75 70 73" stroke="#2E7D32" stroke-width="1" fill="none"/>
+        <path d="M50 90 Q40 95 30 93" stroke="#2E7D32" stroke-width="1" fill="none"/>
+        <path d="M50 90 Q60 95 70 93" stroke="#2E7D32" stroke-width="1" fill="none"/>
+      </g>
+      
+      <!-- Second leaf -->
+      <g opacity="0.05">
+        <path d="M150 100 Q170 70 190 100 Q210 130 190 160 Q170 190 150 160 Q130 130 150 100Z" fill="#4CAF50"/>
+        <path d="M150 100 Q150 130 150 160" stroke="#2E7D32" stroke-width="2" fill="none"/>
+        <path d="M150 120 Q140 125 130 123" stroke="#2E7D32" stroke-width="1" fill="none"/>
+        <path d="M150 120 Q160 125 170 123" stroke="#2E7D32" stroke-width="1" fill="none"/>
+        <path d="M150 140 Q140 145 130 143" stroke="#2E7D32" stroke-width="1" fill="none"/>
+        <path d="M150 140 Q160 145 170 143" stroke="#2E7D32" stroke-width="1" fill="none"/>
+      </g>
+      
+      <!-- Third leaf (smaller) -->
+      <g opacity="0.05">
+        <path d="M200 25 Q215 5 230 25 Q245 45 230 65 Q215 85 200 65 Q185 45 200 25Z" fill="#4CAF50"/>
+        <path d="M200 25 Q200 45 200 65" stroke="#2E7D32" stroke-width="1.5" fill="none"/>
+        <path d="M200 35 Q195 40 190 39" stroke="#2E7D32" stroke-width="0.8" fill="none"/>
+        <path d="M200 35 Q205 40 210 39" stroke="#2E7D32" stroke-width="0.8" fill="none"/>
+        <path d="M200 45 Q195 50 190 49" stroke="#2E7D32" stroke-width="0.8" fill="none"/>
+        <path d="M200 45 Q205 50 210 49" stroke="#2E7D32" stroke-width="0.8" fill="none"/>
+        <path d="M200 55 Q195 60 190 59" stroke="#2E7D32" stroke-width="0.8" fill="none"/>
+        <path d="M200 55 Q205 60 210 59" stroke="#2E7D32" stroke-width="0.8" fill="none"/>
+      </g>
+      
+      <!-- Fourth leaf (rotated) -->
+      <g opacity="0.05" transform="translate(75, 200) rotate(-30)">
+        <path d="M0 0 Q20 -30 40 0 Q60 30 40 60 Q20 90 0 60 Q-20 30 0 0Z" fill="#4CAF50"/>
+        <path d="M0 0 Q0 30 0 60" stroke="#2E7D32" stroke-width="2" fill="none"/>
+        <path d="M0 15 Q-10 20 -20 18" stroke="#2E7D32" stroke-width="1" fill="none"/>
+        <path d="M0 15 Q10 20 20 18" stroke="#2E7D32" stroke-width="1" fill="none"/>
+        <path d="M0 30 Q-10 35 -20 33" stroke="#2E7D32" stroke-width="1" fill="none"/>
+        <path d="M0 30 Q10 35 20 33" stroke="#2E7D32" stroke-width="1" fill="none"/>
+        <path d="M0 45 Q-10 50 -20 48" stroke="#2E7D32" stroke-width="1" fill="none"/>
+        <path d="M0 45 Q10 50 20 48" stroke="#2E7D32" stroke-width="1" fill="none"/>
+      </g>
+    </pattern>
+  </defs>
+  
+  <rect width="100%" height="100%" fill="url(#leaf-pattern)"/>
+</svg>

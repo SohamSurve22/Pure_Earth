@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PureEarth - Environmental Monitoring Platform{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Add Three.js for 3D visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    
+    <!-- Add GSAP for animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    
+    <!-- Particle.js for background effects -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <!-- Add Three.js for 3D visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    
+    <!-- Add GSAP for animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    
+    <!-- Particle.js for background effects -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    
+    <style>
+        /* Custom Theme Colors */
+        :root {
+            --primary-color: #2E7D32;
+            --primary-light: #60AD5E;
+            --primary-dark: #005005;
+            --secondary-color: #00796B;
+            --secondary-light: #48A999;
+            --secondary-dark: #004C40;
+            --text-on-primary: #FFFFFF;
+            --text-on-secondary: #FFFFFF;
+            --success-color: #43A047;
+            --danger-color: #D32F2F;
+            --warning-color: #FFB300;
+            --info-color: #039BE5;
+        }
+
+        /* General Styles */
+        /* Immersive UI Enhancements */
+        .particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        
+        .bg-gradient-animated {
+            background: linear-gradient(-45deg, #2E7D32, #00796B, #039BE5, #2E7D32);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        /* Card hover effects */
+        .hover-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .hover-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        .hover-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to right, 
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,0.3) 100%
+            );
+            transform: skewX(-25deg);
+            transition: all 0.7s ease;
+        }
+        .hover-card:hover::before {
+            left: 100%;
+        }
+        
+        /* Earth rotation animation */
+        .earth-rotate {
+            animation: rotate 60s linear infinite;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Element fade-in animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Parallax scrolling effect */
+        .parallax-section {
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        
+        /* Glow effects for important elements */
+        .glow-effect {
+            box-shadow: 0 0 15px rgba(46, 125, 50, 0.5);
+            transition: box-shadow 0.3s ease;
+        }
+        .glow-effect:hover {
+            box-shadow: 0 0 25px rgba(46, 125, 50, 0.8);
+        }
+        
+        /* Animated progress bars */
+        .progress.animated .progress-bar {
+            width: 0;
+            transition: width 1.5s ease;
+        }
+        
+        /* Floating elements */
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        /* Pulse animation for calls to action */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Wave effect background */
+        .wave-bg {
+            position: relative;
+            overflow: hidden;
+        }
+        .wave-bg::before {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%232E7D32" fill-opacity="0.2" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,144C960,149,1056,139,1152,122.7C1248,107,1344,85,1392,74.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+            background-size: cover;
+        }
+        /* Immersive UI Enhancements */
+        .particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        
+        .bg-gradient-animated {
+            background: linear-gradient(-45deg, #2E7D32, #00796B, #039BE5, #2E7D32);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        /* Card hover effects */
+        .hover-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .hover-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        .hover-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to right, 
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,0.3) 100%
+            );
+            transform: skewX(-25deg);
+            transition: all 0.7s ease;
+        }
+        .hover-card:hover::before {
+            left: 100%;
+        }
+        
+        /* Earth rotation animation */
+        .earth-rotate {
+            animation: rotate 60s linear infinite;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Element fade-in animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Parallax scrolling effect */
+        .parallax-section {
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        
+        /* Glow effects for important elements */
+        .glow-effect {
+            box-shadow: 0 0 15px rgba(46, 125, 50, 0.5);
+            transition: box-shadow 0.3s ease;
+        }
+        .glow-effect:hover {
+            box-shadow: 0 0 25px rgba(46, 125, 50, 0.8);
+        }
+        
+        /* Animated progress bars */
+        .progress.animated .progress-bar {
+            width: 0;
+            transition: width 1.5s ease;
+        }
+        
+        /* Floating elements */
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        /* Pulse animation for calls to action */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Wave effect background */
+        .wave-bg {
+            position: relative;
+            overflow: hidden;
+        }
+        .wave-bg::before {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%232E7D32" fill-opacity="0.2" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,144C960,149,1056,139,1152,122.7C1248,107,1344,85,1392,74.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+            background-size: cover;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #F8F9FA;
+            color: #333;
+        }
+        
+        /* NavBar */
+        .navbar-custom {
+            background-color: var(--primary-color);
+        }
+        .navbar-custom .navbar-brand,
+        .navbar-custom .nav-link {
+            color: var(--text-on-primary);
+        }
+        .navbar-custom .nav-link:hover {
+            color: rgba(255, 255, 255, 0.85);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #343A40;
+            color: #FFFFFF;
+        }
+        
+        /* Stat Cards */
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+        .stat-card.secondary {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-light) 100%);
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        .stat-card i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .stat-card .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .stat-card .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        /* AQI Category Colors */
+        .aqi-green {
+            background-color: #4CAF50 !important;
+            color: white !important;
+        }
+        .aqi-good {
+            background-color: #8BC34A !important;
+            color: white !important;
+        }
+        .aqi-average {
+            background-color: #FFC107 !important;
+            color: #212529 !important;
+        }
+        .aqi-poor {
+            background-color: #F44336 !important;
+            color: white !important;
+        }
+        
+        /* Image Upload Zone */
+        .drop-zone {
+            border: 2px dashed #ccd0d4;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .drop-zone.dragover {
+            background-color: rgba(46, 125, 50, 0.1);
+            border-color: var(--primary-color);
+        }
+        .drop-zone i {
+            font-size: 2.5rem;
+            color: #ccd0d4;
+        }
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Thermal Image Container */
+        .thermal-image-container {
+            position: relative;
+            display: inline-block;
+        }
+        .thermal-image {
+            border-radius: 5px;
+            max-width: 100%;
+            border: 1px solid #ddd;
+        }
+        .hotspot-marker {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: rgba(255, 0, 0, 0.5);
+            border: 2px solid white;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.5);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 0, 0, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+            }
+        }
+        
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.8s ease forwards;
+            opacity: 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Media Queries */
+        @media (max-width: 768px) {
+            .stat-card .stat-value {
+                font-size: 1.7rem;
+            }
+            .stat-card i {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'index' %}">
+                <i class="fas fa-leaf me-2"></i>PureEarth
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'index' %}">
+                            <i class="fas fa-home me-1"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'dashboard' in request.path %}active{% endif %}" href="{% url 'dashboard' %}">
+                            <i class="fas fa-chart-line me-1"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'green-calculator' in request.path %}active{% endif %}" href="{% url 'green_calculator' %}">
+                            <i class="fas fa-leaf me-1"></i> Green Calculator
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'aqi-calculator' in request.path %}active{% endif %}" href="{% url 'aqi_calculator' %}">
+                            <i class="fas fa-calculator me-1"></i> AQI Calculator
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'image-analyzer' in request.path %}active{% endif %}" href="{% url 'image_analyzer' %}">
+                            <i class="fas fa-camera me-1"></i> Image Analyzer
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'leaderboard' in request.path %}active{% endif %}" href="{% url 'leaderboard' %}">
+                            <i class="fas fa-trophy me-1"></i> Leaderboard
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+            <div class="alert {{ message.tags }} alert-dismissible fade show mb-0" role="alert">
+                <div class="container">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5 class="text-white"><i class="fas fa-leaf me-2"></i>PureEarth</h5>
+                    <p class="text-muted small">An environmental monitoring platform designed to help companies track and improve their sustainability metrics.</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5 class="text-white">Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'dashboard' %}" class="text-muted small">Dashboard</a></li>
+                        <li><a href="{% url 'green_calculator' %}" class="text-muted small"><strong>Green Calculator</strong></a></li>
+                        <li><a href="{% url 'aqi_calculator' %}" class="text-muted small">AQI Calculator</a></li>
+                        <li><a href="{% url 'image_analyzer' %}" class="text-muted small">Image Analyzer</a></li>
+                        <li><a href="{% url 'leaderboard' %}" class="text-muted small">Leaderboard</a></li>
+                    <p class="text-muted small mt-2">
+                        <i class="fas fa-info-circle me-1"></i> Total scores are weighted: 60% Green, 15% AQI, 25% Thermal
+                    </p>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5 class="text-white">Contact Us</h5>
+                    <ul class="list-unstyled text-muted small">
+                        <li class="text-white"><i class="fas fa-envelope me-2 text-white"></i>Soham Surve SY09C-52</li>
+                        <li class="text-white"><i class="fas fa-envelope me-2 text-white"></i>Dinky Gurbani SY09C-68</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="mt-4 mb-4 border-light">
+            <div class="row align-items-center">
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+<script>
+    // Initialize particle background for the homepage hero section
+    if (document.getElementById('particles-bg')) {
+        particlesJS('particles-bg', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: "#ffffff" },
+                shape: { type: "circle", stroke: { width: 0, color: "#000000" } },
+                opacity: { value: 0.5, random: false },
+                size: { value: 3, random: true },
+                line_linked: { enable: true, distance: 150, color: "#ffffff", opacity: 0.4, width: 1 },
+                move: { enable: true, speed: 2, direction: "none", random: false, straight: false, out_mode: "out", bounce: false }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: { onhover: { enable: true, mode: "repulse" }, onclick: { enable: true, mode: "push" }, resize: true },
+                modes: { repulse: { distance: 100, duration: 0.4 }, push: { particles_nb: 4 } }
+            },
+            retina_detect: true
+        });
+    }
+    
+    // Animated progress bars - only animate when in viewport
+    function animateProgressBars() {
+        const progressBars = document.querySelectorAll('.progress.animated');
+        if (progressBars.length === 0) return;
+        
+        const options = {
+            threshold: 0.2
+        };
+        
+        const observer = new IntersectionObserver(function(entries, observer) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const bars = entry.target.querySelectorAll('.progress-bar');
+                    bars.forEach(bar => {
+                        const value = bar.getAttribute('aria-valuenow') + '%';
+                        setTimeout(() => {
+                            bar.style.width = value;
+                        }, 100);
+                    });
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, options);
+        
+        progressBars.forEach(progress => {
+            observer.observe(progress);
+        });
+    }
+    
+    // Fade-in animation for elements
+    function animateFadeIn() {
+        const fadeElements = document.querySelectorAll('.fade-in');
+        if (fadeElements.length === 0) return;
+        
+        const options = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver(function(entries, observer) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationPlayState = 'running';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, options);
+        
+        fadeElements.forEach(element => {
+            element.style.animationPlayState = 'paused';
+            observer.observe(element);
+        });
+    }
+    
+    // Initialize animations when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        animateProgressBars();
+        animateFadeIn();
+        
+        // Make cards with hover-card class interactive
+        document.querySelectorAll('.hover-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.classList.add('shadow-lg');
+            });
+            card.addEventListener('mouseleave', function() {
+                this.classList.remove('shadow-lg');
+            });
+        });
+    });
+</script>
+</body>
+</html>

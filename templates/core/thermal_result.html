@@ -1,0 +1,628 @@
+{% extends 'core/base.html' %}
+{% load core_extras %}
+
+{% block title %}Thermal Analysis Result - PureEarth{% endblock %}
+
+{% block extra_css %}
+<style>
+    .thermal-image-container {
+        position: relative;
+        display: inline-block;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        max-width: 100%;
+    }
+
+    .thermal-image {
+        max-width: 100%;
+        display: block;
+    }
+
+    .hotspot-marker {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: rgba(255, 0, 0, 0.5);
+        border: 2px solid white;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.5);
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(255, 0, 0, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+        }
+    }
+
+    .data-card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 15px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+
+    .temp-gradient {
+        height: 20px;
+        background: linear-gradient(to right, #4CAF50, #8BC34A, #FFC107, #F44336);
+        border-radius: 10px;
+        margin: 15px 0;
+    }
+
+    .temp-marker {
+        position: relative;
+        height: 30px;
+    }
+
+    .temp-marker::before {
+        content: '';
+        position: absolute;
+        top: -30px;
+        width: 2px;
+        height: 20px;
+        background-color: #333;
+    }
+
+    .temp-marker::after {
+        content: '';
+        position: absolute;
+        top: -10px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #333;
+        transform: translateX(-4px);
+    }
+
+    .temp-value {
+        font-size: 0.8rem;
+        color: #666;
+    }
+
+    .result-circle {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        border: 10px solid;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        margin: 0 auto;
+    }
+
+    .result-circle.green {
+        border-color: #4CAF50;
+        background-color: rgba(76, 175, 80, 0.1);
+    }
+
+    .result-circle.good {
+        border-color: #8BC34A;
+        background-color: rgba(139, 195, 74, 0.1);
+    }
+
+    .result-circle.average {
+        border-color: #FFC107;
+        background-color: rgba(255, 193, 7, 0.1);
+    }
+
+    .result-circle.poor {
+        border-color: #F44336;
+        background-color: rgba(244, 67, 54, 0.1);
+    }
+
+    .analysis-metric {
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+
+    .recommendation-card {
+        border-left: 4px solid;
+        margin-bottom: 15px;
+    }
+
+    .recommendation-card.green {
+        border-color: #4CAF50;
+    }
+
+    .recommendation-card.good {
+        border-color: #8BC34A;
+    }
+
+    .recommendation-card.average {
+        border-color: #FFC107;
+    }
+
+    .recommendation-card.poor {
+        border-color: #F44336;
+    }
+
+    .heat-source-badge {
+        display: inline-block;
+        padding: 0.35em 0.65em;
+        font-size: 0.75em;
+        font-weight: 700;
+        line-height: 1;
+        color: #fff;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.25rem;
+        margin-right: 5px;
+        margin-bottom: 5px;
+        background-color: #dc3545;
+    }
+
+    .viz-selector .nav-link {
+        padding: 8px 12px;
+        border-radius: 4px;
+        margin-right: 8px;
+        font-weight: 500;
+        color: #6c757d;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+    }
+
+    .viz-selector .nav-link.active {
+        color: #fff;
+        background: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .viz-selector .nav-link:hover:not(.active) {
+        background: #e9ecef;
+    }
+
+    .heatmap-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .heatmap-legend {
+        height: 30px;
+        background: linear-gradient(to right, blue, cyan, green, yellow, red);
+        border-radius: 3px;
+        margin-top: 10px;
+        position: relative;
+    }
+
+    .heatmap-legend-label {
+        position: absolute;
+        font-size: 10px;
+        color: #333;
+    }
+
+    .heatmap-legend-label.low {
+        left: 2px;
+        top: -15px;
+    }
+
+    .heatmap-legend-label.high {
+        right: 2px;
+        top: -15px;
+    }
+
+    .thermal-info {
+        background: rgba(255,255,255,0.9);
+        padding: 10px;
+        border-radius: 5px;
+        margin-top: 15px;
+    }
+
+    .heat-source-marker {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: 2px solid red;
+        transform: translate(-50%, -50%);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="py-3">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-6 mb-2">Analysis Results</h1>
+                <p class="text-muted">Detailed thermal analysis report for uploaded image.</p>
+            </div>
+            <div class="col-lg-6 d-flex justify-content-lg-end">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'image_analyzer' %}">Image Analyzer</a></li>
+                        <div class="col-lg-6 d-flex justify-content-lg-end">
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb mb-0">
+                                    <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+                                    <li class="breadcrumb-item"><a href="{% url 'image_analyzer' %}">Thermal Image Analyzer</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">Result</li>
+                                </ol>
+                            </nav>
+                        </div>
+                        <li class="breadcrumb-item active" aria-current="page">Results</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Visualization Column -->
+            <div class="col-lg-8 mb-4">
+                {% include 'core/includes/thermal_visualization.html' %}
+            </div>
+
+            <!-- Analysis Details Column -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">Analysis Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6>Company</h6>
+                            <p class="mb-0">{{ analysis.company.name }}</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6>Thermal Category</h6>
+                            <span class="badge 
+                                {% if analysis.thermal_category == 'Green' %}bg-success
+                                {% elif analysis.thermal_category == 'Good' %}bg-info
+                                {% elif analysis.thermal_category == 'Average' %}bg-warning text-dark
+                                {% else %}bg-danger{% endif %}">
+                                {{ analysis.thermal_category }}
+                            </span>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6>Points Earned</h6>
+                            <p class="mb-0">{{ analysis.points_earned }}/100</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6>Heat Sources</h6>
+                            <p class="mb-0">Total: {{ analysis.heat_source_count }}</p>
+                            <p class="mb-0">Large: {{ analysis.large_heat_source_count }}</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6>Temperature Range</h6>
+                            <p class="mb-0">Min: {{ analysis.min_temperature|floatformat:1 }}°C</p>
+                            <p class="mb-0">Max: {{ analysis.max_temperature|floatformat:1 }}°C</p>
+                        </div>
+
+                        <div>
+                            <h6>Pollution Status</h6>
+                            <span class="badge {% if analysis.pollution_status == 'Non-Polluted' %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ analysis.pollution_status }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Heat Sources -->
+                <div class="card border-0 shadow">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">Heat Source Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Temperature</th>
+                                        <th>Size</th>
+                                        <th>Location</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% with heat_sources=analysis.heat_sources_json|parse_json %}
+                                        {% for source in heat_sources %}
+                                            <tr>
+                                                <td>#{{ source.id }}</td>
+                                                <td>{{ source.temperature|floatformat:1 }}°C</td>
+                                                <td>
+                                                    {% if source.is_large %}
+                                                        <span class="badge bg-danger">Large</span>
+                                                    {% else %}
+                                                        <span class="badge bg-info">Normal</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>({{ source.x|floatformat:0 }}, {{ source.y|floatformat:0 }})</td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% endwith %}
+
+                                    {% if not analysis.heat_sources_json %}
+                                        <tr>
+                                            <td colspan="4" class="text-center py-3">
+                                                <span class="text-muted">No detailed heat source data available.</span>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Original content from lines 221-480 is re-inserted here -->
+        <!-- Company Information Header -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h3>{{ analysis.company.name }}</h3>
+                                <p class="text-muted mb-3">
+                                    <i class="fas fa-industry me-2"></i> {{ analysis.company.industry|default:"Industry not specified" }}
+                                </p>
+                                <p class="mb-2">
+                                    <span class="badge aqi-{{ analysis.thermal_category|lower }} p-2">{{ analysis.thermal_category }}</span>
+                                    <span class="text-muted ms-2">Analyzed on {{ analysis.analyzed_at|date:"F d, Y" }}</span>
+                                </p>
+                                <p class="mb-0">
+                                    <span class="badge bg-{{ analysis.pollution_status|lower|yesno:"danger,success" }} p-2">{{ analysis.pollution_status }}</span>
+                                    <span class="text-muted ms-2">{{ analysis.heat_source_count }} heat source{{ analysis.heat_source_count|pluralize }} detected</span>
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                <div class="d-flex align-items-center justify-content-md-end">
+                                    <i class="fas fa-trophy fa-2x text-warning me-2"></i>
+                                    <div>
+                                        <span class="d-block fs-4 fw-bold">{{ analysis.points_earned }}</span>
+                                        <span class="text-muted small">Sustainability Points</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Details Row -->
+        <div class="row">
+            <!-- Temperature Analysis Column -->
+            <div class="col-lg-6 mb-4">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">Temperature Analysis</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <h6 class="mb-3">Temperature Range</h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <div>
+                                    <div class="temp-value text-success">{{ analysis.min_temperature|floatformat:1 }}°C</div>
+                                    <div class="small text-muted">Min</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="temp-value text-primary">
+                                        {{ analysis.max_temperature|add:analysis.min_temperature|floatformat:0|divisibleby:2 }}°C
+                                    </div>
+                                    <div class="small text-muted">Median</div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="temp-value text-danger">{{ analysis.max_temperature|floatformat:1 }}°C</div>
+                                    <div class="small text-muted">Max</div>
+                                </div>
+                            </div>
+
+                            <div class="temp-gradient"></div>
+                        </div>
+
+                        <h6 class="mb-3">Hotspot Location</h6>
+                        <div class="data-card p-3">
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="text-center">
+                                        <div class="fs-5">{{ analysis.hottest_region_x }}</div>
+                                        <div class="small text-muted">X-coordinate</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="text-center">
+                                        <div class="fs-5">{{ analysis.hottest_region_y }}</div>
+                                        <div class="small text-muted">Y-coordinate</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Heat Sources Column -->
+            <div class="col-lg-6 mb-4">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">Heat Source Analysis</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="analysis-metric mb-4">
+                            <div class="row">
+                                <div class="col-6">
+                                    <h6 class="mb-2">Total Heat Sources</h6>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-fire-alt fa-2x text-danger me-2"></i>
+                                        <span class="fs-3 fw-bold">{{ analysis.heat_source_count }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <h6 class="mb-2">Large Heat Sources</h6>
+                                    <div class="d-flex align-items-center justify-content-end">
+                                        <span class="fs-3 fw-bold">{{ analysis.large_heat_source_count }}</span>
+                                        <i class="fas fa-exclamation-triangle fa-2x text-warning ms-2"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="analysis-metric">
+                            <h6 class="mb-3">Detected Heat Sources</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Size</th>
+                                            <th>Temperature</th>
+                                            <th>Status</th>
+                                            <th>Location</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% if analysis.heat_sources_json %}
+                                            {% with heat_sources=analysis.heat_sources_json|parse_json %}
+                                                {% for source in heat_sources %}
+                                                    <tr>
+                                                        <td>{{ source.id }}</td>
+                                                        <td>{{ source.area|floatformat:0 }} px</td>
+                                                        <td>{{ source.temp|floatformat:1 }}°C</td>
+                                                        <td>
+                                                            {% if source.is_large %}
+                                                                <span class="badge bg-danger">Large</span>
+                                                            {% else %}
+                                                                <span class="badge bg-info">Normal</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>({{ source.x|floatformat:0 }}, {{ source.y|floatformat:0 }})</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            {% endwith %}
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="5" class="text-center py-3">
+                                                    <span class="text-muted">No detailed heat source data available.</span>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations Row -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">Sustainability Recommendations</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="recommendation-card {{ analysis.thermal_category|lower }} p-3 mb-3">
+                            <h6 class="fw-bold mb-2">Temperature Management</h6>
+                            {% if analysis.thermal_category == 'Green' %}
+                                <p class="mb-0">
+                                    Your facility shows excellent thermal management. Continue monitoring temperature levels 
+                                    to maintain optimal energy efficiency.
+                                </p>
+                            {% elif analysis.thermal_category == 'Good' %}
+                                <p class="mb-0">
+                                    Your facility shows good thermal management. Consider implementing regular inspections 
+                                    of the {{ analysis.heat_source_count }} identified heat sources to maintain efficiency.
+                                </p>
+                            {% elif analysis.thermal_category == 'Average' %}
+                                <p class="mb-0">
+                                    Your facility shows moderate thermal management issues. We recommend implementing 
+                                    insulation improvements and checking equipment efficiency around the {{ analysis.heat_source_count }} 
+                                    identified heat sources.
+                                </p>
+                            {% else %}
+                                <p class="mb-0">
+                                    Your facility shows significant thermal management issues. Immediate attention is required for the 
+                                    {{ analysis.large_heat_source_count }} large heat sources identified. Consider equipment replacement 
+                                    or major insulation upgrades.
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        <div class="recommendation-card {{ analysis.thermal_category|lower }} p-3">
+                            <h6 class="fw-bold mb-2">Pollution Reduction</h6>
+                            {% if analysis.pollution_status == 'Polluted' %}
+                                <p class="mb-0">
+                                    The thermal signature indicates potential pollution sources. 
+                                    Implementing heat recovery systems and upgrading insulation could reduce waste heat 
+                                    and improve sustainability scores significantly.
+                                </p>
+                            {% else %}
+                                <p class="mb-0">
+                                    Your facility doesn't show thermal signatures typical of pollution sources. 
+                                    Continue monitoring and consider implementing preventative maintenance to maintain this good status.
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions Row -->
+        <div class="row">
+            <div class="col-12 text-center">
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{% url 'image_analyzer' %}" class="btn btn-primary">
+                        <i class="fas fa-camera me-2"></i> Analyze Another Image
+                    </a>
+                    <a href="{% url 'aqi_calculator' %}" class="btn btn-success">
+                        <i class="fas fa-calculator me-2"></i> Calculate AQI
+                    </a>
+                    <a href="{% url 'dashboard' %}" class="btn btn-info">
+                        <i class="fas fa-chart-line me-2"></i> Return to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Activate Bootstrap tabs
+        var triggerTabList = [].slice.call(document.querySelectorAll('.viz-selector .nav-link'))
+        triggerTabList.forEach(function (triggerEl) {
+            var tabTrigger = new bootstrap.Tab(triggerEl)
+
+            triggerEl.addEventListener('click', function (event) {
+                event.preventDefault()
+                tabTrigger.show()
+            })
+        })
+    });
+</script>
+{% endblock %}

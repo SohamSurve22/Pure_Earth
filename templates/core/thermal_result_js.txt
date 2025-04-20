@@ -1,0 +1,175 @@
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Activate Bootstrap tabs
+        var triggerTabList = [].slice.call(document.querySelectorAll('.viz-selector .nav-link'))
+        triggerTabList.forEach(function (triggerEl) {
+            var tabTrigger = new bootstrap.Tab(triggerEl)
+            
+            triggerEl.addEventListener('click', function (event) {
+                event.preventDefault()
+                tabTrigger.show()
+            })
+        })
+        
+        // Parse heat sources JSON if available
+        try {
+            const heatSourcesEl = document.getElementById('heat-sources-data');
+            if (heatSourcesEl) {
+                const heatSourcesData = JSON.parse(heatSourcesEl.textContent);
+                console.log('Heat sources data loaded:', heatSourcesData);
+                
+                // Generate temperature distribution chart if there is data
+                if (heatSourcesData && heatSourcesData.length > 0) {
+                    const tempValues = heatSourcesData.map(source => source.temperature);
+                    
+                    // Add temperature distribution chart to a new tab
+                    const tabsEl = document.querySelector('.viz-selector');
+                    
+                    // Check if the tab already exists
+                    if (!document.getElementById('temp-dist-tab')) {
+                        // Add new tab
+                        const newTab = document.createElement('li');
+                        newTab.className = 'nav-item';
+                        newTab.innerHTML = `
+                            <a class="nav-link" id="temp-dist-tab" data-bs-toggle="tab" href="#temp-dist" role="tab">
+                                <i class="fas fa-chart-line me-2"></i>Temperature
+                            </a>
+                        `;
+                        tabsEl.appendChild(newTab);
+                        
+                        // Add new tab content
+                        const tabContentContainer = document.querySelector('.tab-content');
+                        const newTabContent = document.createElement('div');
+                        newTabContent.className = 'tab-pane fade';
+                        newTabContent.id = 'temp-dist';
+                        newTabContent.setAttribute('role', 'tabpanel');
+                        newTabContent.innerHTML = `
+                            <div class="card border-0 shadow">
+                                <div class="card-header bg-white py-3">
+                                    <h5 class="mb-0">Temperature Distribution</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div style="height: 300px;">
+                                        <canvas id="tempDistChart"></canvas>
+                                    </div>
+                                    <p class="text-muted mt-3 small">
+                                        Distribution of temperature values across detected heat sources.
+                                        Higher peaks indicate more heat sources at that temperature.
+                                    </p>
+                                </div>
+                            </div>
+                        `;
+                        tabContentContainer.appendChild(newTabContent);
+                        
+                        // Create temperature distribution chart
+                        const tempDistCanvas = document.getElementById('tempDistChart');
+                        if (tempDistCanvas) {
+                            // Sort temperatures to make the chart more meaningful
+                            tempValues.sort((a, b) => a - b);
+                            
+                            // Group temperatures into ranges for better visualization
+                            const numBins = Math.min(10, Math.ceil(Math.sqrt(tempValues.length)));
+                            const minTemp = Math.min(...tempValues);
+                            const maxTemp = Math.max(...tempValues);
+                            const binSize = (maxTemp - minTemp) / numBins;
+                            
+                            const bins = Array(numBins).fill(0);
+                            const binLabels = [];
+                            
+                            for (let i = 0; i < numBins; i++) {
+                                const binStart = minTemp + i * binSize;
+                                const binEnd = binStart + binSize;
+                                binLabels.push(`${binStart.toFixed(1)} - ${binEnd.toFixed(1)}`);
+                            }
+                            
+                            tempValues.forEach(temp => {
+                                const binIndex = Math.min(
+                                    numBins - 1, 
+                                    Math.floor((temp - minTemp) / binSize)
+                                );
+                                bins[binIndex]++;
+                            });
+                            
+                            const tempDistChart = new Chart(tempDistCanvas, {
+                                type: 'bar',
+                                data: {
+                                    labels: binLabels,
+                                    datasets: [{
+                                        label: 'Heat Sources',
+                                        data: bins,
+                                        backgroundColor: function(context) {
+                                            const index = context.dataIndex;
+                                            const value = context.dataset.data[index];
+                                            const position = index / (numBins - 1); // 0 to 1
+                                            // Create a gradient from green to red
+                                            return `rgba(${Math.round(position * 255)}, ${Math.round((1 - position) * 255)}, 0, 0.8)`;
+                                        },
+                                        borderColor: 'rgba(0, 0, 0, 0.1)',
+                                        borderWidth: 1
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        title: {
+                                            display: true,
+                                            text: 'Temperature Distribution of Heat Sources'
+                                        },
+                                        legend: {
+                                            display: false
+                                        },
+                                        tooltip: {
+                                            callbacks: {
+                                                title: function(tooltipItems) {
+                                                    return `Temperature Range: ${tooltipItems[0].label}`;
+                                                },
+                                                label: function(context) {
+                                                    return `${context.raw} heat source(s)`;
+                                                }
+                                            }
+                                        }
+                                    },
+                                    scales: {
+                                        x: {
+                                            title: {
+                                                display: true,
+                                                text: 'Temperature Range'
+                                            },
+                                            ticks: {
+                                                maxRotation: 45,
+                                                minRotation: 45
+                                            }
+                                        },
+                                        y: {
+                                            title: {
+                                                display: true,
+                                                text: 'Number of Heat Sources'
+                                            },
+                                            beginAtZero: true,
+                                            ticks: {
+                                                precision: 0
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                        
+                        // Initialize the new tab with event listeners
+                        const newTabTrigger = new bootstrap.Tab(document.getElementById('temp-dist-tab'));
+                        document.getElementById('temp-dist-tab').addEventListener('click', function(event) {
+                            event.preventDefault();
+                            newTabTrigger.show();
+                        });
+                    }
+                }
+            }
+        } catch (e) {
+            console.log('Error parsing heat sources data:', e);
+        }
+    });
+</script>
+{% endblock %}
